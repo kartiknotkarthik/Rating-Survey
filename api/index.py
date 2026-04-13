@@ -5,7 +5,7 @@ import sys
 
 # Add root directory to path to import our modules
 current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.dirname(os.path.dirname(current_dir))
+root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
 from Phase_1_Scraping.scrape_reviews import scrape_full_batch
