@@ -8,9 +8,9 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
 sys.path.append(root_dir)
 
-from Phase_1_Scraping.scrape_reviews import scrape_full_batch
-from Phase_2_Analysis.analyze_data import GrowwAnalyzerPhase2
-from Phase_3_Email.send_email import GrowwMailerPhase3
+from backend.Phase_1_Scraping.scrape_reviews import scrape_full_batch
+from backend.Phase_2_Analysis.analyze_data import GrowwAnalyzerPhase2
+from backend.Phase_3_Email.send_email import GrowwMailerPhase3
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
