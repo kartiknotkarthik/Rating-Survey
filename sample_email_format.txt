@@ -1,0 +1,31 @@
+Subject: [GROWW Pulse] Weekly Review Summary - High Brokerage Charges & UI Feedback
+
+Hi [Recipient Name]!
+
+[AI-Generated Intro]: This week's feedback shows high user frustration with increasing brokerage costs and recent technical issues during trade execution, alongside praise for the platform's overall simplicity.
+
+---
+
+### Weekly Pulse - GROWW App (Google Play Store)
+
+#### Top 3 Themes
+1. **High Brokerage Charges**: Users are expressing dissatisfaction with the high brokerage charges levied by Groww, comparing them unfavorably to other platforms. Many feel that these charges eat into their profits, making the platform less competitive.
+2. **Technical Issues**: Numerous users are reporting technical problems, including errors during login, issues with order execution, and difficulties with withdrawing funds. These issues are leading to frustration and financial losses for some users.
+3. **User Experience and Misleading Information**: There are complaints about the user interface, with some finding it less intuitive than before, especially after updates. Additionally, there are concerns about misleading information, such as the lack of clear disclosure on brokerage charges and the platform's performance metrics.
+
+#### 3 Real User Quotes
+* "App Bahut Accha Hai Par Brokerage Bahut HIGH Hai."
+* "I am unable to refresh my external funds, it asks to go to mf Central but clicking on it leads to a blank screen."
+* "charges are increased too high, more than others"
+
+#### 3 Action Ideas
+1. **Review and Adjust Brokerage Charges**: Conduct a thorough review of the current brokerage charges to ensure they are competitive with other platforms. Consider adjusting these charges to make Groww more attractive to users.
+2. **Enhance Technical Stability and Support**: Invest in improving the technical infrastructure to minimize errors and issues. Additionally, enhance customer support to provide timely and effective solutions to user problems.
+3. **Improve Transparency and User Interface**: Work on making the platform more transparent, especially regarding brokerage charges and performance metrics. Also, consider user feedback to improve the interface, making it more intuitive and user-friendly, possibly by reintroducing popular features from previous versions or adding new ones based on user suggestions.
+
+---
+Report Generated Automatically by GROWW Pulse Analyzer.
+Data source: Google Play Store
+Period: Last 8-12 Weeks
+Filtering Level: High (Eng-Only, No Emojis, 5+ words)
+Analysis Engine: Groq (Llama-3) & Gemini-1.5-Flash

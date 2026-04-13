@@ -1,0 +1,25 @@
+# Environment
+.env
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Data & Reports
+data/
+reports/*.json
+reports/*.md
+reports/themed_reviews.json
+reports/weekly_pulse_note.md
+
+# Next.js / Node
+node_modules/
+next_ui/.next/
+next_ui/out/
+next_ui/build/
+.next/
+
+# IDE
+.vscode/
+.idea/
+.gemini/

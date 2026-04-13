@@ -1,0 +1,8 @@
+google-play-scraper
+streamlit
+pandas
+groq
+python-dotenv
+google-generativeai
+schedule
+pytz
