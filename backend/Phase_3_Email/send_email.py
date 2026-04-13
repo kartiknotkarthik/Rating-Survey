@@ -29,55 +29,80 @@ class GrowwMailerPhase3:
             return "GROWW Weekly Pulse Report", ""
         try:
             model = genai.GenerativeModel('gemini-2.0-flash')
-            prompt = f"Analyze this report and provide: 1. Subject line. 2. 2-sentence executive summary. Respond in JSON: {{\"subject\": \"...\", \"intro\": \"...\"}}\n\nREPORT:\n{report_content[:3000]}"
+            prompt = f"Analyze this report and provide: 1. A punchy professional subject line. 2. A warm 2-sentence intro. Respond in JSON: {{\"subject\": \"...\", \"intro\": \"...\"}}\n\nREPORT:\n{report_content[:3000]}"
             response = model.generate_content(prompt)
             data = json.loads(response.text.replace('```json', '').replace('```', '').strip())
             return data.get("subject", "GROWW Weekly Pulse"), data.get("intro", "")
         except Exception:
             return "GROWW Weekly Pulse Report", ""
 
-    def send_via_resend(self, to_email, subject, body):
-        """Transaction API for Vercel Compatibility"""
+    def get_html_template(self, recipient_name, intro, report_md):
+        # Convert MD-like sections to clean HTML components
+        sections = report_md.split('---')
+        content_html = ""
+        
+        for section in sections:
+            clean_section = section.strip().replace('*', '').replace('#', '')
+            if clean_section:
+                content_html += f"<div style='margin-bottom: 30px; padding: 20px; background: #f9fbf9; border-left: 4px solid #00d09c;'>{clean_section.replace('\n', '<br>')}</div>"
+
+        return f"""
+        <html>
+            <body style="font-family: 'Georgia', serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; background-color: #fdfaf6; padding: 20px;">
+                <div style="background-color: #ffffff; padding: 40px; border: 1px solid #e5e1da; border-top: 6px solid #00d09c;">
+                    <div style="text-align: center; margin-bottom: 40px;">
+                        <h1 style="font-style: italic; font-size: 38px; margin-bottom: 5px; color: #1a1a1a;">Groww <span style="color: #00d09c;">Pulse.</span></h1>
+                        <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 10px; color: #94a3b8; font-family: sans-serif;">Weekly Intelligence Editorial</p>
+                    </div>
+                    
+                    <p style="font-family: sans-serif; font-size: 16px;">Hi {recipient_name},</p>
+                    <p style="font-family: sans-serif; font-size: 16px; color: #475569;">{intro}</p>
+                    
+                    <div style="margin-top: 40px;">
+                        {content_html}
+                    </div>
+                    
+                    <footer style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; text-align: center; font-size: 10px; color: #94a3b8; font-family: sans-serif; text-transform: uppercase;">
+                        © 2026 Groww Intelligence Bureau • Restricted Access
+                    </footer>
+                </div>
+            </body>
+        </html>
+        """
+
+    def send_via_resend(self, to_email, subject, html_content):
         url = "https://api.resend.com/emails"
-        headers = {
-            "Authorization": f"Bearer {self.resend_api_key}",
-            "Content-Type": "application/json"
-        }
+        headers = {"Authorization": f"Bearer {self.resend_api_key}", "Content-Type": "application/json"}
         data = {
             "from": "Groww Pulse <onboarding@resend.dev>",
             "to": [to_email],
             "subject": subject,
-            "text": body
+            "html": html_content
         }
         response = requests.post(url, headers=headers, json=data)
         return response.status_code == 200, response.text
 
     def send_pulse_email(self, report_md, receiver_email=None, recipient_name="Team"):
         target_email = receiver_email if receiver_email else self.receiver_email
-        if not target_email:
-            return False, "No recipient email provided."
+        if not target_email: return False, "No recipient email provided."
 
         subject, intro = self.generate_email_context(report_md)
-        greeting = f"Hi {recipient_name}!\n\n"
-        email_body = f"{greeting}{intro}\n\n---\n\n{report_md}"
+        html_body = self.get_html_template(recipient_name, intro, report_md)
 
-        # OPTION 1: Use Resend API (Preferred for Vercel)
         if self.resend_api_key:
-            success, msg = self.send_via_resend(target_email, subject, email_body)
+            success, msg = self.send_via_resend(target_email, subject, html_body)
             if success: return True, {"method": "Resend API", "to": target_email}
 
-        # OPTION 2: Fallback to SMTP (Works locally)
         if self.sender_email and self.sender_password:
             try:
                 msg = MIMEMultipart()
                 msg['From'], msg['To'], msg['Subject'] = self.sender_email, target_email, subject
-                msg.attach(MIMEText(email_body, 'plain'))
+                msg.attach(MIMEText(html_body, 'html'))
                 with smtplib.SMTP('smtp.gmail.com', 587) as server:
                     server.starttls()
                     server.login(self.sender_email, self.sender_password)
                     server.send_message(msg)
                 return True, {"method": "Gmail SMTP", "to": target_email}
-            except Exception as e:
-                return False, f"SMTP Error: {str(e)}"
+            except Exception as e: return False, str(e)
 
-        return False, "No mailing method configured (Need Resend API Key or Gmail Credentials)"
+        return False, "Configuration error."

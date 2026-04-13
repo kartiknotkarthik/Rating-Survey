@@ -4,5 +4,11 @@
       "source": "/api/pulse",
       "destination": "/api/index.py"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/pulse",
+      "schedule": "30 16 * * 1"
+    }
   ]
 }

@@ -61,7 +61,28 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"message": f"Internal Error: {str(e)}"}).encode('utf-8'))
             
     def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/plain')
-        self.end_headers()
-        self.wfile.write(b"GROWW Pulse API is running.")
+        # Trigger point for Vercel Cron
+        try:
+            email = os.getenv("RECEIVER_EMAIL")
+            name = "Stakeholder"
+            
+            # 1. Scrape
+            reviews_list = scrape_full_batch(max_count=100) # Speed it up for Cron
+            
+            # 2. Analyze
+            analyzer = GrowwAnalyzerPhase2()
+            report, themes = analyzer.generate_pulse_report(reviews_list)
+            
+            # 3. Mail
+            mailer = GrowwMailerPhase3()
+            success, info = mailer.send_pulse_email(report, receiver_email=email, recipient_name=name)
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"message": "Weekly Cron Pulse Triggered", "success": success}).encode('utf-8'))
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"message": f"Cron Error: {str(e)}"}).encode('utf-8'))
