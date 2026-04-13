@@ -46,7 +46,7 @@ def run_pulse_job():
         
         if process.returncode == 0:
             log_message("Successfully executed scheduled pipeline.")
-            log_message(f"Output: {stdout[:500]}...") # Log partial output
+            log_message(f"Output: {stdout[:2000]}...") # Log more output
         else:
             log_message(f"ERROR during scheduled execution:\n{stderr}")
             
@@ -54,29 +54,28 @@ def run_pulse_job():
         log_message(f"Scheduler Job failed: {e}")
 
 def main():
-    log_message("--- GROWW Pulse Aligned Scheduler Started ---")
-    log_message(f"Target: Every 5 minutes (aligned: :00, :05, :10...)")
+    log_message("--- GROWW Pulse Daily Scheduler Started ---")
+    log_message(f"Target Time: 10:00 AM IST Daily")
     log_message(f"Recipient: {FIXED_RECIPIENT}")
     log_message(f"Logs: {os.path.abspath(LOG_FILE)}")
     log_message("---------------------------------------------")
 
-    last_run_minute = -1
+    last_run_date = None
     
     while True:
         now_ist = datetime.now(IST)
-        current_minute = now_ist.minute
+        current_date = now_ist.date()
         
-        # Trigger on the 5-minute mark (:00, :05, :10, etc.)
-        if current_minute % 5 == 0 and current_minute != last_run_minute:
-            # Extra check for seconds to avoid multiple triggers in the same minute
-            # although last_run_minute handles it.
-            run_pulse_job()
-            last_run_minute = current_minute
-            # Sleep a bit to move away from the current second
-            time.sleep(60)
+        # Trigger at 10:00 AM IST
+        if now_ist.hour == 10 and now_ist.minute == 0:
+            if last_run_date != current_date:
+                run_pulse_job()
+                last_run_date = current_date
+                # Sleep for 61 seconds to ensure we don't trigger again in the same minute
+                time.sleep(61)
         
-        # Check every 10 seconds to stay responsive
-        time.sleep(10)
+        # Check every 30 seconds to stay responsive
+        time.sleep(30)
 
 if __name__ == "__main__":
     main()

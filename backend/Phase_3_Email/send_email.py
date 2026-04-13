@@ -102,17 +102,16 @@ class GrowwMailerPhase3:
 
     def send_pulse_email(self, report_md, receiver_email=None, recipient_name="Team"):
         target_email = receiver_email if receiver_email else self.receiver_email
-        if not target_email: return False, "No recipient email provided."
+        if not target_email or "@example.com" in target_email:
+            return False, "No valid recipient email provided in .env or arguments."
 
         subject, intro = self.generate_email_context(report_md)
         html_body = self.get_html_template(recipient_name, intro, report_md)
 
-        if self.resend_api_key:
-            success, msg = self.send_via_resend(target_email, subject, html_body)
-            if success: return True, {"method": "Resend API", "to": target_email}
-
+        # 1. Try Gmail SMTP First (More reliable for local schedulers)
         if self.sender_email and self.sender_password:
             try:
+                print(f"Attempting to send via Gmail SMTP ({self.sender_email})...")
                 msg = MIMEMultipart()
                 msg['From'], msg['To'], msg['Subject'] = self.sender_email, target_email, subject
                 msg.attach(MIMEText(html_body, 'html'))
@@ -120,7 +119,22 @@ class GrowwMailerPhase3:
                     server.starttls()
                     server.login(self.sender_email, self.sender_password)
                     server.send_message(msg)
+                print("Successfully sent via Gmail SMTP.")
                 return True, {"method": "Gmail SMTP", "to": target_email}
-            except Exception as e: return False, str(e)
+            except Exception as e:
+                print(f"Gmail SMTP Failed: {e}")
 
-        return False, "Configuration error."
+        # 2. Fallback to Resend API
+        if self.resend_api_key:
+            try:
+                print("Attempting to send via Resend API...")
+                success, msg = self.send_via_resend(target_email, subject, html_body)
+                if success:
+                    print("Successfully sent via Resend API.")
+                    return True, {"method": "Resend API", "to": target_email}
+                else:
+                    print(f"Resend API Failed: {msg}")
+            except Exception as e:
+                print(f"Resend Error: {e}")
+
+        return False, "All email delivery methods failed. Check your .env configuration."
