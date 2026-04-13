@@ -8,7 +8,7 @@
   "crons": [
     {
       "path": "/api/pulse",
-      "schedule": "30 16 * * 1"
+      "schedule": "30 19 * * *"
     }
   ]
 }

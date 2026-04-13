@@ -63,8 +63,8 @@ class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         # Trigger point for Vercel Cron
         try:
-            email = os.getenv("RECEIVER_EMAIL")
-            name = "Stakeholder"
+            email = os.getenv("RECEIVER_EMAIL") or "kartik.notkarthik@gmail.com"
+            name = "Kartik"
             
             # 1. Scrape
             reviews_list = scrape_full_batch(max_count=100) # Speed it up for Cron
