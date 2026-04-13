@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Local Data / Reports
+data/
+reports/
+
+# Old Framework Folders
+next_ui/
+.next/
+node_modules/
+
+# IDE & Misc
+.vscode/
+.idea/
+.gemini/
+.git/
+README.md
+architecture.md
+sample_email_format.txt
+backend/requirements_full.txt
