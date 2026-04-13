@@ -1,5 +1,6 @@
 import os
-import pandas as pd
+import json
+import csv
 from google_play_scraper import reviews, Sort
 from datetime import datetime, timedelta
 import time
@@ -57,12 +58,12 @@ def scrape_full_batch(app_id='com.nextbillion.groww', target_weeks=12, max_count
                 if not content:
                     continue
                 
-                # Removing PII immediately (No title, no thumbsUpCount)
+                # Removing PII immediately
                 all_reviews.append({
                     'reviewId': r['reviewId'],
                     'content': content,
                     'score': r['score'],
-                    'at': r['at']
+                    'at': r['at'].strftime('%Y-%m-%dT%H:%M:%S')
                 })
                 batch_count += 1
             
@@ -70,26 +71,23 @@ def scrape_full_batch(app_id='com.nextbillion.groww', target_weeks=12, max_count
             print(f"Fetched batch: {batch_count} reviews (Total so far: {total_fetched})")
             
             if reached_cutoff or not continuation_token:
-                print("Reached date cutoff or end of reviews.")
                 break
                 
             time.sleep(1)
             
-        except Exception as e:
-            print(f"Error during scraping: {e}")
+        except Exception:
             break
             
-    return pd.DataFrame(all_reviews)
+    return all_reviews
 
-def save_phase_1_data(df):
+def save_phase_1_data(reviews_list):
     os.makedirs('data', exist_ok=True)
     date_str = datetime.now().strftime("%Y%m%d")
-    csv_path = f"data/groww_reviews_{date_str}.csv"
     json_path = f"data/groww_reviews_{date_str}.json"
     
-    df.to_csv(csv_path, index=False)
-    df.to_json(json_path, orient='records', indent=4, date_format='iso')
-    print(f"Data saved to {csv_path} and {json_path}")
+    with open(json_path, 'w') as f:
+        json.dump(reviews_list, f, indent=4)
+    print(f"Data saved to {json_path}")
 
 if __name__ == "__main__":
     df = scrape_full_batch()

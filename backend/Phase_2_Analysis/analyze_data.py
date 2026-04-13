@@ -1,6 +1,5 @@
 import os
 import json
-import pandas as pd
 from groq import Groq
 from dotenv import load_dotenv
 
@@ -44,32 +43,30 @@ class GrowwAnalyzerPhase2:
         themes_raw = self._get_llm_response(system_prompt, user_prompt)
         return [t.strip() for t in themes_raw.split(',') if t.strip()][:5]
 
-    def categorize_reviews_by_themes(self, df, themes):
+    def categorize_reviews_by_themes(self, reviews_list, themes):
         """
         Categorizes each review into one of the identified themes.
         """
         categorized_data = {theme: [] for theme in themes}
         categorized_data["Uncategorized"] = []
         
-        # To avoid too many API calls, we'll process in batches of 10
         batch_size = 10
-        for i in range(0, len(df), batch_size):
-            batch = df.iloc[i:i+batch_size]
-            reviews_list = "\n".join([f"ID: {r['reviewId']} | Content: {r['content']}" for _, r in batch.iterrows()])
+        for i in range(0, len(reviews_list), batch_size):
+            batch = reviews_list[i:i+batch_size]
+            batch_text = "\n".join([f"ID: {r['reviewId']} | Content: {r['content']}" for r in batch])
             
             prompt = f"""
             Categorize each of these GROWW reviews into EXACTLY ONE of the following themes: {', '.join(themes)}.
             If none fit well, use 'Uncategorized'.
             
             REVIEWS:
-            {reviews_list}
+            {batch_text}
             
             Respond ONLY with a JSON list of objects: [{{"id": "...", "theme": "..."}}, ...]
             """
             
             response = self._get_llm_response("You are a data categorization assistant.", prompt)
             try:
-                # Clean response if LLM adds markdown backticks
                 json_str = response.strip()
                 if json_str.startswith("```json"):
                     json_str = json_str[7:-3].strip()
@@ -78,19 +75,19 @@ class GrowwAnalyzerPhase2:
                     
                 results = json.loads(json_str)
                 for res in results:
-                    matching_review = df[df['reviewId'] == res['id']].iloc[0].to_dict()
-                    theme_key = res['theme'] if res['theme'] in categorized_data else "Uncategorized"
-                    categorized_data[theme_key].append(matching_review)
-            except Exception as e:
-                print(f"Error parsing categorization for batch {i}: {e}")
-                for _, r in batch.iterrows():
-                    categorized_data["Uncategorized"].append(r.to_dict())
+                    matching_review = next((r for r in batch if r['reviewId'] == res['id']), None)
+                    if matching_review:
+                        theme_key = res['theme'] if res['theme'] in categorized_data else "Uncategorized"
+                        categorized_data[theme_key].append(matching_review)
+            except Exception:
+                for r in batch:
+                    categorized_data["Uncategorized"].append(r)
                     
         return categorized_data
 
-    def generate_pulse_report(self, df):
-        sample_df = df.head(100) 
-        reviews_block = "\n".join([f"- [Rating: {r['score']}] {r['content']}" for _, r in sample_df.iterrows()])
+    def generate_pulse_report(self, reviews_list):
+        sample = reviews_list[:100]
+        reviews_block = "\n".join([f"- [Rating: {r['score']}] {r['content']}" for r in sample])
         
         themes = self.extract_themes(reviews_block[:4000])
         
@@ -113,38 +110,3 @@ class GrowwAnalyzerPhase2:
         
         report = self._get_llm_response(system_prompt, user_prompt)
         return report, themes
-
-if __name__ == "__main__":
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_dir = os.path.join(base_dir, "data")
-    
-    if not os.path.exists(data_dir):
-        print("Data directory not found. Please run Phase 1 first.")
-    else:
-        json_files = [f for f in os.listdir(data_dir) if f.endswith('.json')]
-        if not json_files:
-            print("No JSON data found in ../data. Run Phase 1 first.")
-        else:
-            latest_file = os.path.join(data_dir, sorted(json_files)[-1])
-            print(f"Reading latest data: {latest_file}")
-            
-            with open(latest_file, 'r') as f:
-                data = json.load(f)
-                df = pd.DataFrame(data)
-            
-            analyzer = GrowwAnalyzerPhase2()
-            print("Analyzing reviews and generating report...")
-            report, themes = analyzer.generate_pulse_report(df)
-            
-            # Save report
-            os.makedirs('reports', exist_ok=True)
-            with open("reports/weekly_pulse_note.md", "w") as f:
-                f.write(report)
-            
-            print("Categorizing all reviews by themes (this may take a moment)...")
-            categorized_json = analyzer.categorize_reviews_by_themes(df, themes)
-            
-            with open("reports/themed_reviews.json", "w") as f:
-                json.dump(categorized_json, f, indent=4)
-                
-            print(f"Success! \n- Report: reports/weekly_pulse_note.md\n- Grouped JSON: reports/themed_reviews.json")

@@ -30,11 +30,11 @@ class handler(BaseHTTPRequestHandler):
 
         try:
             # 1. Scrape
-            df = scrape_full_batch(max_count=200)
+            reviews_list = scrape_full_batch(max_count=200)
             
             # 2. Analyze
             analyzer = GrowwAnalyzerPhase2()
-            report, themes = analyzer.generate_pulse_report(df)
+            report, themes = analyzer.generate_pulse_report(reviews_list)
             
             # 3. Mail
             mailer = GrowwMailerPhase3()
