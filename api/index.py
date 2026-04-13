@@ -3,10 +3,13 @@ import json
 import os
 import sys
 
-# Add root directory to path to import our modules
+# Add current and root directory to path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
-sys.path.append(root_dir)
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
 
 from backend.Phase_1_Scraping.scrape_reviews import scrape_full_batch
 from backend.Phase_2_Analysis.analyze_data import GrowwAnalyzerPhase2
