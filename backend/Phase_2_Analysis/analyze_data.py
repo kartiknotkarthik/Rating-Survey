@@ -15,7 +15,7 @@ class GrowwAnalyzerPhase2:
             raise ValueError("GROQ_API_KEY not found in environment. Please check your .env file.")
         
         self.client = Groq(api_key=self.api_key)
-        self.model = "llama-3.3-70b-versatile"
+        self.model = "llama-3.1-8b-instant"
 
     def _get_llm_response(self, system_prompt, user_prompt):
         try:
