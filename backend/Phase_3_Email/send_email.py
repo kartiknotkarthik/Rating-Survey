@@ -4,18 +4,22 @@ import json
 import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 # Load credentials from root .env
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-dotenv_path = os.path.join(base_dir, ".env")
+# Phase_3_Email is at backend/Phase_3_Email/
+# Root is 3 levels up from this FILE
+file_path = os.path.abspath(__file__)
+root_path = os.path.dirname(os.path.dirname(os.path.dirname(file_path)))
+dotenv_path = os.path.join(root_path, ".env")
 load_dotenv(dotenv_path=dotenv_path)
 
-# Configure Gemini
+# Configure Gemini Client
 google_api_key = os.getenv("GOOGLE_API_KEY")
+gemini_client = None
 if google_api_key:
-    genai.configure(api_key=google_api_key)
+    gemini_client = genai.Client(api_key=google_api_key)
 
 class GrowwMailerPhase3:
     def __init__(self):
@@ -25,15 +29,20 @@ class GrowwMailerPhase3:
         self.resend_api_key = os.getenv("RESEND_API_KEY")
         
     def generate_email_context(self, report_content):
-        if not google_api_key:
+        if not gemini_client:
             return "GROWW Weekly Pulse Report", ""
         try:
-            model = genai.GenerativeModel('gemini-2.0-flash')
             prompt = f"Analyze this report and provide: 1. A punchy professional subject line. 2. A warm 2-sentence intro. Respond in JSON: {{\"subject\": \"...\", \"intro\": \"...\"}}\n\nREPORT:\n{report_content[:3000]}"
-            response = model.generate_content(prompt)
-            data = json.loads(response.text.replace('```json', '').replace('```', '').strip())
+            response = gemini_client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=prompt
+            )
+            # Support both .text and .parsed if implemented, but .text is standard
+            text_response = response.text
+            data = json.loads(text_response.replace('```json', '').replace('```', '').strip())
             return data.get("subject", "GROWW Weekly Pulse"), data.get("intro", "")
-        except Exception:
+        except Exception as e:
+            print(f"Gemini Error: {e}")
             return "GROWW Weekly Pulse Report", ""
 
     def get_html_template(self, recipient_name, intro, report_md):

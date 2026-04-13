@@ -62,27 +62,41 @@ class handler(BaseHTTPRequestHandler):
             
     def do_GET(self):
         # Trigger point for Vercel Cron
+        print("--- Weekly Cron Triggered ---")
         try:
             email = os.getenv("RECEIVER_EMAIL") or "kartik.notkarthik@gmail.com"
             name = "Kartik"
             
             # 1. Scrape
-            reviews_list = scrape_full_batch(max_count=100) # Speed it up for Cron
+            print(f"Phase 1: Scraping reviews for {email}...")
+            reviews_list = scrape_full_batch(max_count=60) # Reduced to 60 for stability on Hobby Plan (10s limit)
             
             # 2. Analyze
+            print(f"Phase 2: Analyzing {len(reviews_list)} reviews...")
             analyzer = GrowwAnalyzerPhase2()
             report, themes = analyzer.generate_pulse_report(reviews_list)
             
             # 3. Mail
+            print("Phase 3: Dispatching email...")
             mailer = GrowwMailerPhase3()
             success, info = mailer.send_pulse_email(report, receiver_email=email, recipient_name=name)
             
+            log_msg = f"Cron Result - Success: {success}, Info: {info}"
+            print(log_msg)
+
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"message": "Weekly Cron Pulse Triggered", "success": success}).encode('utf-8'))
+            self.wfile.write(json.dumps({
+                "message": "Weekly Cron Pulse Triggered", 
+                "success": success,
+                "info": info
+            }).encode('utf-8'))
+
         except Exception as e:
+            error_msg = f"Cron Fatal Error: {str(e)}"
+            print(error_msg)
             self.send_response(500)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"message": f"Cron Error: {str(e)}"}).encode('utf-8'))
+            self.wfile.write(json.dumps({"message": error_msg}).encode('utf-8'))

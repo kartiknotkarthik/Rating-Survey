@@ -4,8 +4,12 @@ from groq import Groq
 from dotenv import load_dotenv
 
 # Load API keys from root .env
-base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-dotenv_path = os.path.join(base_path, ".env")
+# Load API keys from root .env
+# Phase_2_Analysis is at backend/Phase_2_Analysis/
+# Root is 3 levels up from this FILE
+file_path = os.path.abspath(__file__)
+root_path = os.path.dirname(os.path.dirname(os.path.dirname(file_path)))
+dotenv_path = os.path.join(root_path, ".env")
 load_dotenv(dotenv_path=dotenv_path)
 
 class GrowwAnalyzerPhase2:

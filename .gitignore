@@ -7,10 +7,9 @@ __pycache__/
 
 # Data & Reports
 data/
-reports/*.json
-reports/*.md
-reports/themed_reviews.json
-reports/weekly_pulse_note.md
+reports/
+backend/reports/
+scheduler.log
 
 # Next.js / Node
 node_modules/

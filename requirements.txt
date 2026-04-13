@@ -1,5 +1,5 @@
 google-play-scraper
 groq
-google-generativeai
+google-genai
 requests
 python-dotenv
