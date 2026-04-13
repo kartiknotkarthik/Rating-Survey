@@ -37,51 +37,42 @@ class GrowwMailerPhase3:
             return "GROWW Weekly Pulse Report", ""
 
     def get_html_template(self, recipient_name, intro, report_md):
-        # Clean formatting and prepare sections
-        sections = report_md.split('---')
-        content_html = ""
+        # Clean the Markdown content for raw display in a single card
+        clean_content = report_md.replace('---', '<hr style="border: 0; border-top: 1px solid #e5e1da; margin: 30px 0;">')
+        lines = clean_content.strip().split('\n')
         
-        for section in sections:
-            # Remove MD artifacts and handle bolding/paragraphs
-            lines = section.strip().split('\n')
-            formatted_lines = []
-            for line in lines:
-                clean_line = line.strip().replace('*', '').replace('#', '')
-                if not clean_line: continue
-                
-                # Check if it looks like a heading (short line or start of section)
-                if len(clean_line) < 60 or ':' in clean_line:
-                    formatted_lines.append(f"<p style='margin-bottom: 12px;'><strong>{clean_line}</strong></p>")
-                else:
-                    formatted_lines.append(f"<p style='margin-bottom: 18px;'>{clean_line}</p>")
+        formatted_body = ""
+        for line in lines:
+            text = line.strip().replace('*', '').replace('#', '')
+            if not text:
+                continue
             
-            if formatted_lines:
-                content_html += f"""
-                <div style='margin-bottom: 25px; padding: 25px; background: #f9fbf9; border: 1px solid #e5e1da; border-left: 5px solid #00d09c;'>
-                    {''.join(formatted_lines)}
-                </div>
-                """
+            # Simple heuristic for headings
+            if len(text) < 60 or ':' in text:
+                formatted_body += f"<p style='margin-bottom: 8px;'><strong>{text}</strong></p>"
+            else:
+                formatted_body += f"<p style='margin-bottom: 20px;'>{text}</p>"
 
         return f"""
         <html>
-            <body style="font-family: 'Helvetica', 'Arial', sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 950px; margin: 0 auto; background-color: #fdfaf6; padding: 20px;">
+            <body style="font-family: 'Helvetica', 'Arial', sans-serif; line-height: 1.7; color: #1a1a1a; max-width: 950px; margin: 0 auto; background-color: #fdfaf6; padding: 20px;">
                 <div style="background-color: #ffffff; padding: 50px; border: 1px solid #e5e1da; border-top: 8px solid #00d09c;">
-                    <div style="text-align: center; margin-bottom: 50px; border-bottom: 2px solid #1a1a1a; pb: 20px;">
-                        <h1 style="font-style: italic; font-size: 48px; margin-bottom: 10px; color: #1a1a1a; font-family: 'Georgia', serif;">Groww <span style="color: #00d09c;">Pulse.</span></h1>
-                        <p style="text-transform: uppercase; letter-spacing: 3px; font-size: 12px; color: #64748b; font-weight: bold;">Weekly Intelligence Editorial • Landscape Briefing</p>
+                    <div style="text-align: center; margin-bottom: 40px; padding-bottom: 30px; border-bottom: 2px solid #1a1a1a;">
+                        <h1 style="font-style: italic; font-size: 48px; margin-bottom: 5px; color: #1a1a1a; font-family: 'Georgia', serif;">Groww <span style="color: #00d09c;">Pulse.</span></h1>
+                        <p style="text-transform: uppercase; letter-spacing: 3px; font-size: 11px; color: #64748b; font-weight: bold;">Confidential Weekly Briefing • Global Intelligence Editorial</p>
                     </div>
                     
                     <div style="margin-bottom: 40px;">
-                        <p style="font-size: 18px; margin-bottom: 10px;">Hi <strong>{recipient_name}</strong>,</p>
-                        <p style="font-size: 18px; color: #475569; font-style: italic;">{intro}</p>
+                        <p style="font-size: 18px; margin-bottom: 5px;">Hi <strong>{recipient_name}</strong>,</p>
+                        <p style="font-size: 18px; color: #475569; font-style: italic; margin-top: 0;">{intro}</p>
                     </div>
                     
-                    <div style="display: grid; gap: 20px;">
-                        {content_html}
+                    <div style="padding: 10px 0;">
+                        {formatted_body}
                     </div>
                     
                     <footer style="margin-top: 60px; border-top: 1px solid #eee; padding-top: 30px; text-align: center; font-size: 11px; color: #94a3b8; text-transform: uppercase;">
-                        © 2026 Groww Intelligence Bureau • Confidential Weekly Report
+                        © 2026 Groww Intelligence Bureau • Dispatch ID: {os.urandom(4).hex().upper()}
                     </footer>
                 </div>
             </body>
