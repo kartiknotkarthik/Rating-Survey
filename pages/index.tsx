@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
-import { Mail, Zap, CheckCircle, Loader2, BarChart3, ShieldCheck } from 'lucide-react';
+import { Mail, Send, Loader2, Sparkles, BookOpen, Quote, Target, CheckCircle } from 'lucide-react';
 
-export default function GrowwPulseDashboard() {
+export default function GrowwPulseNewsletter() {
   const [loading, setLoading] = useState(false);
   const [complete, setComplete] = useState(false);
   const [name, setName] = useState("");
@@ -17,7 +17,7 @@ export default function GrowwPulseDashboard() {
     
     setLoading(true);
     setComplete(false);
-    setStatus("Fetching reviews from Play Store...");
+    setStatus("Curating weekly insights...");
     
     try {
       const response = await fetch('/api/pulse', {
@@ -29,111 +29,129 @@ export default function GrowwPulseDashboard() {
       const result = await response.json();
       
       if (response.ok) {
-        setStatus("Analysis complete. Email sent!");
+        setStatus("Newsletter delivered!");
         setComplete(true);
       } else {
-        setStatus(`Error: ${result.message || 'Unknown error'}`);
+        setStatus(`Delivery Failed: ${result.message || 'Check Environment Variables'}`);
       }
     } catch (err) {
-      setStatus("Failed to connect to backend.");
+      setStatus("Connection error to intelligence engine.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white p-8 font-sans">
+    <div className="min-h-screen bg-[#fdfaf6] text-[#1a1a1a] p-6 lg:p-12 font-serif selection:bg-[#00d09c]/30">
       <Head>
-        <title>GROWW Pulse | Review Analyzer</title>
+        <title>The GROWW Pulse | Weekly Editorial</title>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
       </Head>
       
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-12">
-          <div className="bg-[#00d09c] p-3 rounded-2xl shadow-lg shadow-[#00d09c]/20">
-            <BarChart3 size={32} className="text-[#0f172a]" />
+      <div className="max-w-3xl mx-auto bg-white border border-[#e5e1da] shadow-sm rounded-sm p-4 lg:p-16">
+        {/* Masthead */}
+        <header className="text-center border-b-2 border-[#1a1a1a] pb-8 mb-12">
+          <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.2em] font-sans font-bold text-slate-400 mb-6">
+            <span>Volume I • Issue IV</span>
+            <span>{new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
           </div>
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight">GROWW <span className="text-[#00d09c]">Pulse</span></h1>
-            <p className="text-slate-400">Automated Weekly Review Analyzer</p>
+          <h1 className="text-6xl lg:text-8xl font-black font-['Playfair_Display'] tracking-tighter mb-4 italic">
+            Groww <span className="text-[#00d09c]">Pulse.</span>
+          </h1>
+          <p className="text-xl font-medium font-sans text-slate-500 uppercase tracking-widest">Weekly Intelligence & User Sentiment Report</p>
+        </header>
+
+        {/* Introduction */}
+        <div className="grid lg:grid-cols-3 gap-12 mb-12">
+          <div className="lg:col-span-2 font-sans leading-relaxed text-slate-600">
+            <p className="mb-4 first-letter:text-5xl first-letter:font-bold first-letter:mr-3 first-letter:float-left first-letter:text-[#1a1a1a]">
+              The Groww Pulse is a curated briefing designed for teams who prioritize user feedback. By leveraging advanced LLM analysis, we transform raw Play Store noise into strategic editorial insights.
+            </p>
+            <p>
+              Each report identifies exactly five recurring themes, synthesizes actionable steps, and highlights the voices that matter most—your users.
+            </p>
+          </div>
+          <div className="bg-[#f8f6f2] p-6 rounded-sm border border-[#e5e1da] transform rotate-2">
+            <Sparkles className="text-[#00d09c] mb-3" size={24} />
+            <h4 className="font-bold text-sm uppercase tracking-wider mb-2 font-sans">AI Powered</h4>
+            <p className="text-xs text-slate-500 font-sans leading-snug">Powered by Llama 3.3 Large Language Models for deepest sentiment extraction.</p>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-3xl backdrop-blur-xl transition-all hover:border-[#00d09c]/30">
-            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-              <Zap size={20} className="text-[#00d09c]" /> Configuration
-            </h2>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Stakeholder Name</label>
-                <input 
-                  type="text" 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Karry"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00d09c]/50 transition-all text-white"
-                />
-              </div>
+        {/* Interaction Zone */}
+        <section className="bg-[#1a1a1a] text-white p-10 rounded-sm mb-12 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+            <BookOpen size={120} />
+          </div>
+          
+          <h3 className="font-['Playfair_Display'] text-3xl mb-8">Ready to brief your team?</h3>
+          
+          <div className="space-y-6 max-w-md font-sans">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Recipient Identification</label>
+              <input 
+                type="text" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Stakeholder Name"
+                className="w-full bg-slate-800/50 border-b border-white/20 py-3 px-1 focus:outline-none focus:border-[#00d09c] transition-all text-lg"
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Delivery Email</label>
-                <input 
-                  type="email" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. kartik@gmail.com"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#00d09c]/50 transition-all text-white"
-                />
-              </div>
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Electronic Mailbox</label>
+              <input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="w-full bg-slate-800/50 border-b border-white/20 py-3 px-1 focus:outline-none focus:border-[#00d09c] transition-all text-lg"
+              />
+            </div>
 
-              <button 
-                onClick={runAnalysis}
-                disabled={loading}
-                className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg ${
-                  loading 
-                    ? "bg-slate-800 text-slate-500 cursor-not-allowed" 
-                    : "bg-[#00d09c] text-[#0f172a] hover:bg-[#00b08a] hover:scale-[1.02]"
-                }`}
-              >
-                {loading ? <Loader2 className="animate-spin" /> : <Mail size={18} />}
-                {loading ? "Processing..." : "Generate & Send Pulse"}
-              </button>
+            <button 
+              onClick={runAnalysis}
+              disabled={loading}
+              className={`w-full py-5 font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all ${
+                loading 
+                  ? "bg-slate-700 text-slate-500" 
+                  : "bg-white text-[#1a1a1a] hover:bg-[#00d09c] hover:text-white"
+              }`}
+            >
+              {loading ? <Loader2 className="animate-spin" /> : <Send size={16} />}
+              {loading ? "Analyzing..." : "Dispatch Pulse Report"}
+            </button>
+
+            <div className="h-4">
+              {status && (
+                <p className={`text-[10px] font-bold uppercase tracking-widest text-center ${complete ? "text-[#00d09c]" : "text-slate-500"}`}>
+                  {status}
+                </p>
+              )}
             </div>
           </div>
+        </section>
 
-          <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-3xl backdrop-blur-xl flex flex-col justify-center items-center text-center">
-            {!loading && !complete && (
-              <div>
-                <ShieldCheck size={64} className="text-slate-800 mb-4 mx-auto" />
-                <h3 className="text-xl font-medium text-slate-500">Ready to Analyze</h3>
-                <p className="text-slate-600 mt-2 text-sm">Fill in the details to start the pipeline</p>
-              </div>
-            )}
-
-            {loading && (
-              <div>
-                <Loader2 size={48} className="text-[#00d09c] animate-spin mb-4 mx-auto" />
-                <p className="text-[#00d09c] font-medium">{status}</p>
-              </div>
-            )}
-
-            {complete && (
-              <div>
-                <CheckCircle size={64} className="text-[#00d09c] mb-4 mx-auto" />
-                <h3 className="text-2xl font-bold">Pulse Sent!</h3>
-                <p className="text-slate-400 mt-2">The report has been delivered to <strong>{email}</strong></p>
-                <button 
-                  onClick={() => setComplete(false)}
-                  className="mt-6 text-sm text-slate-500 hover:text-white transition-colors"
-                >
-                  Create another report
-                </button>
-              </div>
-            )}
-          </div>
+        {/* Feature Highlights */}
+        <div className="grid grid-cols-3 gap-6 font-sans text-center">
+            <div className="space-y-2">
+                <Target size={20} className="mx-auto text-slate-400" />
+                <span className="block text-[10px] font-black uppercase tracking-tighter">Strategic Actions</span>
+            </div>
+            <div className="space-y-2">
+                <Quote size={20} className="mx-auto text-slate-400" />
+                <span className="block text-[10px] font-black uppercase tracking-tighter">Vocal Sentiment</span>
+            </div>
+            <div className="space-y-2">
+                <CheckCircle size={20} className="mx-auto text-slate-400" />
+                <span className="block text-[10px] font-black uppercase tracking-tighter">Clean Filters</span>
+            </div>
         </div>
+
+        <footer className="mt-20 pt-8 border-t border-slate-100 text-[10px] text-slate-400 font-sans flex justify-between uppercase tracking-widest">
+            <span>© 2026 Groww Intelligence Bureau</span>
+            <span>Restricted Access Only</span>
+        </footer>
       </div>
     </div>
   );
