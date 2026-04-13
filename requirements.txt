@@ -1,3 +1,4 @@
 google-play-scraper
 groq
 google-generativeai
+requests
